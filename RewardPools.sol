@@ -870,9 +870,9 @@ contract RewardPools is IRewardDistributionRecipient, IRewardPools {
     using SafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.AddressSet;
     
-    //IERC20 public rewardToken;
     uint256 public totalID;
     uint256 oneMonth = 30 days;
+    uint256 threeYear = 3 * 12 * oneMonth;
     bool public isVote;
     EnumerableSet.AddressSet rewardToken;
 
@@ -1029,7 +1029,7 @@ contract RewardPools is IRewardDistributionRecipient, IRewardPools {
         updateReward(pid, msg.sender) 
     {
         require(amount > 0, "amount cant not less than 0");
-        //require(time/oneMonth >= 1, "time shoud >= oneMonth");
+        require(time/oneMonth >= 1, "time shoud >= oneMonth");
 
         stake(pid, time, amount);
         emit Deposit(msg.sender, pid, amount);
@@ -1107,6 +1107,9 @@ contract RewardPools is IRewardDistributionRecipient, IRewardPools {
 
 
     function stake(uint256 pid, uint256 time, uint256 amount) internal {
+        if(time > threeYear) {
+            time = threeYear;
+        }
         poolUse[pid].totalSupply = poolUse[pid].totalSupply.add(amount);
         user[pid][msg.sender].balances = user[pid][msg.sender].balances.add(amount);
 
@@ -1131,6 +1134,10 @@ contract RewardPools is IRewardDistributionRecipient, IRewardPools {
             poolUse[pid].totalTime = poolUse[pid].totalTime.sub(user[pid][msg.sender].choiceTime);
 
             user[pid][msg.sender].choiceTime = _remainTime.add(time);
+            if(user[pid][msg.sender].choiceTime > threeYear) {
+                user[pid][msg.sender].choiceTime = threeYear;
+            }
+            
             user[pid][msg.sender].endTime = user[pid][msg.sender].choiceTime.add(_currTime);
             user[pid][msg.sender].lastTime = _currTime;
             user[pid][msg.sender].weight = user[pid][msg.sender].balances.mul(user[pid][msg.sender].choiceTime);
