@@ -1072,8 +1072,8 @@ contract RewardPools is IRewardDistributionRecipient, IRewardPools {
         uint256 reward = earned(rid, pid, msg.sender);
         if (reward > 0) {
             userInfo[rid][pid][msg.sender].rewards = 0;
-            IERC20(getTokenMember(rid)).safeTransfer(msg.sender, reward);
             poolInfo[rid][pid].initreward = poolInfo[rid][pid].initreward.sub(reward);
+            IERC20(getTokenMember(rid)).safeTransfer(msg.sender, reward);
             emit RewardPaid(msg.sender, rid, pid, reward);
         }
     }
